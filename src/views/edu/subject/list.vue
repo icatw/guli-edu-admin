@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-input v-model="filterText" placeholder="Filter keyword" style="margin-bottom:30px;"
+    <el-input v-model="filterText" placeholder="分类名" style="margin-bottom:30px;"
     />
     <el-tree
       ref="subjectTree"
@@ -41,9 +41,13 @@ export default {
         }
       })
     },
+    // filterNode(value, data) {
+    //   if (!value) return true
+    //   return data.title.indexOf(value) !== -1
+    // },
     filterNode(value, data) {
       if (!value) return true
-      return data.title.indexOf(value) !== -1
+      return data.title.toLowerCase().indexOf(value.toLowerCase()) !== -1
     }
   }
 }
