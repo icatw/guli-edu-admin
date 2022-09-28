@@ -14,27 +14,34 @@
 
       <!-- 所属分类 TODO -->
       <el-form-item label="课程分类">
-        <el-select
-          v-model="courseInfo.subjectParentId"
-          placeholder="一级分类"
-          @change="subjectLevelOneChanged">
+        <!--        <el-select-->
+        <!--          v-model="courseInfo.subjectParentId"-->
+        <!--          placeholder="一级分类"-->
+        <!--          @change="subjectLevelOneChanged">-->
 
-          <el-option
-            v-for="subject in subjectOneList"
-            :key="subject.id"
-            :label="subject.title"
-            :value="subject.id"/>
+        <!--          <el-option-->
+        <!--            v-for="subject in subjectOneList"-->
+        <!--            :key="subject.id"-->
+        <!--            :label="subject.title"-->
+        <!--            :value="subject.id"/>-->
 
-        </el-select>
+        <!--        </el-select>-->
 
-        <!-- 二级分类 -->
-        <el-select v-model="courseInfo.subjectId" placeholder="二级分类">
-          <el-option
-            v-for="subject in subjectTwoList"
-            :key="subject.id"
-            :label="subject.title"
-            :value="subject.id"/>
-        </el-select>
+        <!--        &lt;!&ndash; 二级分类 &ndash;&gt;-->
+        <!--        <el-select v-model="courseInfo.subjectId" placeholder="二级分类">-->
+        <!--          <el-option-->
+        <!--            v-for="subject in subjectTwoList"-->
+        <!--            :key="subject.id"-->
+        <!--            :label="subject.title"-->
+        <!--            :value="subject.id"/>-->
+        <!--        </el-select>-->
+        <el-cascader
+          :props="subjectParams"
+          :options="options"
+          v-model="courseInfo.subjectIds"
+          :clearable="true"
+        ></el-cascader>
+
       </el-form-item>
 
       <!-- 课程讲师 TODO -->
@@ -92,9 +99,10 @@
 import course from '@/api/edu/course'
 import subject from '@/api/edu/subject'
 import Tinymce from '@/components/Tinymce'
+
 const defaultForm = {
   title: '',
-  subjectId: '',
+  subjectIds: '',
   teacherId: '',
   lessonNum: 0,
   description: '',
@@ -102,15 +110,23 @@ const defaultForm = {
   price: 0
 }
 export default {
-  components: { Tinymce },
+  components: {Tinymce},
   data() {
     return {
+      options:[],
+      subjectParams: {
+        label: 'title',
+        value: 'id',
+        children: 'children',
+        expandTrigger: 'hover',
+        emitPath: false
+      },
       saveBtnDisabled: false, // 保存按钮是否禁用
       courseInfo: defaultForm,
       teacherList: [],
-      subjectOneList: [], // 一级分类列表
-      subjectTwoList: [], // 二级分类列表
-      BASE_API: process.env.BASE_API// 接口API地址
+      // subjectOneList: [], // 一级分类列表
+      // subjectTwoList: [], // 二级分类列表
+      BASE_API: process.env.BASE_API,// 接口API地址
     }
   },
   created() {
@@ -121,17 +137,18 @@ export default {
   methods: {
     initSubjectList() {
       subject.getNestedTreeList().then(response => {
-        this.subjectOneList = response.data.list
+        // this.subjectOneList = response.data.list
+        this.options = response.data.list
       })
     },
-    subjectLevelOneChanged(value) {
-      for (let i = 0; i < this.subjectOneList.length; i++) {
-        if (this.subjectOneList[i].id === value) {
-          this.subjectTwoList = this.subjectOneList[i].children
-          this.courseInfo.subjectId = ''
-        }
-      }
-    },
+    // subjectLevelOneChanged(value) {
+    //   for (let i = 0; i < this.subjectOneList.length; i++) {
+    //     if (this.subjectOneList[i].id === value) {
+    //       this.subjectTwoList = this.subjectOneList[i].children
+    //       this.courseInfo.subjectId = ''
+    //     }
+    //   }
+    // },
     getListTeacher() {
       course.getListTeacher().then(response => {
         this.teacherList = response.data.items
@@ -146,7 +163,7 @@ export default {
             type: 'success',
             message: '添加课程信息成功!'
           })
-          this.$router.push({ path: '/edu/course/chapter/' + response.data.courseId })
+          this.$router.push({path: '/edu/course/chapter/' + response.data.courseId})
         })
     },
     // 上传封面成功调用的方法
