@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+
 const api_name = '/eduservice/course'
 export default {
   saveCourseInfo(courseInfo) {
@@ -7,5 +8,13 @@ export default {
       method: 'post',
       data: courseInfo
     })
+  },
+  // 2 查询所有讲师
+  getListTeacher() {
+    return request({
+      url: '/eduservice/teacher',
+      method: 'get'
+    })
   }
+
 }

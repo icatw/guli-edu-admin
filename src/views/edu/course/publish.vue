@@ -4,7 +4,7 @@
     <el-steps :active="3" process-status="wait" align-center style="marginbottom: 40px;">
       <el-step title="填写课程基本信息"/>
       <el-step title="创建课程大纲"/>
-      <el-step title="提交审核"/>
+      <el-step title="最终发布"/>
     </el-steps>
     <el-form label-width="120px">
       <el-form-item>
