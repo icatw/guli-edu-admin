@@ -58,8 +58,9 @@
       </el-form-item>
 
       <!-- 课程简介 TODO -->
+      <!-- 课程简介-->
       <el-form-item label="课程简介">
-        <el-input v-model="courseInfo.description" placeholder=" "/>
+        <tinymce :height="300" v-model="courseInfo.description"/>
       </el-form-item>
 
       <!-- 课程封面 TODO -->
@@ -90,17 +91,18 @@
 <script>
 import course from '@/api/edu/course'
 import subject from '@/api/edu/subject'
-
+import Tinymce from '@/components/Tinymce'
 const defaultForm = {
   title: '',
   subjectId: '',
   teacherId: '',
   lessonNum: 0,
   description: '',
-  cover: '',
+  cover: 'http://icatw-blog.oss-cn-beijing.aliyuncs.com/config/dde3c71e642f112140ce6ec3797bbf27.jpg',
   price: 0
 }
 export default {
+  components: { Tinymce },
   data() {
     return {
       saveBtnDisabled: false, // 保存按钮是否禁用
@@ -167,3 +169,9 @@ export default {
   }
 }
 </script>
+<style scoped>
+.tinymce-container {
+  line-height: 29px;
+}
+
+</style>
