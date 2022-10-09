@@ -111,6 +111,13 @@ const defaultForm = {
 }
 export default {
   components: {Tinymce},
+  watch() {
+    $route(to, from)
+    // eslint-disable-next-line no-lone-blocks
+    // {
+    //   // this.courseInfo = {}
+    // }
+  },
   data() {
     return {
       options: [],
@@ -127,12 +134,22 @@ export default {
       // subjectOneList: [], // 一级分类列表
       // subjectTwoList: [], // 二级分类列表
       BASE_API: process.env.BASE_API,// 接口API地址
+      courseId: ''
     }
   },
   created() {
-    //  初始化所有教师
-    this.getListTeacher()
-    this.initSubjectList()
+    //获取路由id值
+    if (this.$route.params && this.$route.params.id) {
+      this.courseId = this.$route.params.id;
+      //调用根据id查询课程的方法
+      this.getInfo();
+    } else {
+      this.courseInfo = defaultForm
+      //初始化所有讲师
+      this.getListTeacher();
+      //初始化一级分类
+      this.initSubjectList();
+    }
   },
   methods: {
     initSubjectList() {
@@ -154,8 +171,20 @@ export default {
         this.teacherList = response.data.items
       })
     },
-    // 添加课程信息
-    saveOrUpdate() {
+    //根据课程id查询
+    getInfo() {
+      course.getCourseInfoId(this.courseId).then((response) => {
+        //在courseInfo课程基本信息，包含 一级分类id 和 二级分类id
+        this.courseInfo = response.data.courseInfoVo;
+        //1 查询所有的分类，包含一级和二级
+        subject.getNestedTreeList().then((response) => {
+          this.options = response.data.list
+        });
+        //初始化所有讲师
+        this.getListTeacher();
+      });
+    },
+    saveCourseInfo() {
       course.saveCourseInfo(this.courseInfo)
         .then(response => {
           // 提示
@@ -165,6 +194,25 @@ export default {
           })
           this.$router.push({path: '/edu/course/chapter/' + response.data.courseId})
         })
+    },
+    updateCourseInfo() {
+      course.updateCourseInfo(this.courseInfo)
+        .then(response => {
+          // 提示
+          this.$message({
+            type: 'success',
+            message: '修改课程信息成功!'
+          })
+          this.$router.push({path: '/edu/course/chapter/' + this.courseId})
+        })
+    },
+    // 添加课程信息
+    saveOrUpdate() {
+      if (!this.courseId) {
+        this.saveCourseInfo()
+      } else {
+        this.updateCourseInfo()
+      }
     },
     // 上传封面成功调用的方法
     handleAvatarSuccess(res, file) {
@@ -190,6 +238,7 @@ export default {
 .tinymce-container {
   line-height: 29px;
 }
+
 /*.avatar-uploader{*/
 /*width: 300px;*/
 /*  height:300px;*/
