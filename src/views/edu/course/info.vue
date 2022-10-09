@@ -40,7 +40,7 @@
           :options="options"
           v-model="courseInfo.subjectIds"
           :clearable="true"
-        ></el-cascader>
+        />
 
       </el-form-item>
 
@@ -111,13 +111,6 @@ const defaultForm = {
 }
 export default {
   components: {Tinymce},
-  watch() {
-    $route(to, from)
-    // eslint-disable-next-line no-lone-blocks
-    // {
-    //   // this.courseInfo = {}
-    // }
-  },
   data() {
     return {
       options: [],
@@ -135,6 +128,11 @@ export default {
       // subjectTwoList: [], // 二级分类列表
       BASE_API: process.env.BASE_API,// 接口API地址
       courseId: ''
+    }
+  },
+  watch: {
+    $route(to, from) {
+      this.courseInfo = defaultForm
     }
   },
   created() {

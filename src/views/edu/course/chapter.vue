@@ -7,7 +7,7 @@
       <el-step title="最终发布"/>
     </el-steps>
 
-    <!--    <el-button type="text" @click="openChapterDialog()">添加章节</el-button>-->
+    <el-button type="text" @click="openChapterDialog()">添加章节</el-button>
 
     <!-- 章节 -->
     <ul class="chanpterList">
@@ -15,17 +15,11 @@
         <p>
           {{ chapter.title }}
 
-          <!--          <span class="acts">-->
-          <!--            <el-button style="" type="text" @click="openVideo(chapter.id)"-->
-          <!--            >添加小节</el-button-->
-          <!--            >-->
-          <!--            <el-button style="" type="text" @click="openEditChatper(chapter.id)"-->
-          <!--            >编辑</el-button-->
-          <!--            >-->
-          <!--            <el-button type="text" @click="removeChapter(chapter.id)"-->
-          <!--            >删除</el-button-->
-          <!--            >-->
-          <!--          </span>-->
+          <span class="acts">
+            <el-button style="" type="text" @click="openVideo(chapter.id)">添加小节</el-button>
+            <el-button style="" type="text" @click="openEditChatper(chapter.id)">编辑</el-button>
+            <el-button type="text" @click="removeChapter(chapter.id)">删除</el-button>
+          </span>
         </p>
 
         <!-- 视频 -->
@@ -47,23 +41,43 @@
     </ul>
     <div>
       <el-button @click="previous">上一步</el-button>
-      <el-button :disabled="saveBtnDisabled" type="primary" @click="next"
-      >下一步
-      </el-button
-      >
+      <el-button :disabled="saveBtnDisabled" type="primary" @click="next">下一步</el-button>
     </div>
+    <!-- 添加和修改章节表单 -->
+    <el-dialog :visible.sync="dialogChapterFormVisible" title="添加章节">
+      <el-form :model="chapter" label-width="120px">
+        <el-form-item label="章节标题">
+          <el-input v-model="chapter.title"/>
+        </el-form-item>
+        <el-form-item label="章节排序">
+          <el-input-number
+            v-model="chapter.sort"
+            :min="0"
+            controls-position="right"
+          />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogChapterFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveOrUpdate">确 定</el-button>
+      </div>
+    </el-dialog>
 
   </div>
 </template>
 <script>
 import chapter from "@/api/edu/chapter";
-import course from "@/api/edu/course";
-import subject from "@/api/edu/subject";
 
 
 export default {
   data() {
     return {
+      chapter: {
+        //封装章节数据
+        title: '',
+        sort: 0,
+      },
+      dialogChapterFormVisible: false, //章节弹框
       saveBtnDisabled: false,// 保存按钮是否禁用
       courseId: '', // 所属课程
       chapterVideoList: [] // 章节嵌套课时列表
@@ -79,10 +93,19 @@ export default {
   },
   methods: {
     previous() {
-      this.$router.push({path: '/edu/course/info/'+this.courseId})
+      this.$router.push({path: '/edu/course/info/' + this.courseId})
     },
     next() {
-      this.$router.push({path: '/edu/course/publish/'+this.courseId})
+      this.$router.push({path: '/edu/course/publish/' + this.courseId})
+    },
+    //修改章节弹框数据回显
+    openEditChatper(chapterId) {
+      //弹框
+      this.dialogChapterFormVisible = true
+      chapter.getChapter(chapterId).then(response => {
+        this.chapter = response.data.chapter
+      })
+
     },
     //根据课程id查询章节和小节
     getChapterVideo() {
@@ -90,31 +113,75 @@ export default {
         this.chapterVideoList = response.data.allChapterVideo;
       });
     },
-    //根据课程id查询
-    getInfo() {
-      course.getCourseInfoId(this.courseId).then((response) => {
-        //在courseInfo课程基本信息，包含 一级分类id 和 二级分类id
-        this.courseInfo = response.data.courseInfoVo;
-        //1 查询所有的分类，包含一级和二级
-        subject.getNestedTreeList().then((response) => {
-          //2 获取所有一级分类
-          this.subjectOneList = response.data.list;
-          //3 把所有的一级分类数组进行遍历，
-          for (var i = 0; i < this.subjectOneList.length; i++) {
-            //获取每个一级分类
-            var oneSubject = this.subjectOneList[i];
-            //比较当前courseInfo里面一级分类id和所有的一级分类id
-            if (this.courseInfo.subjectParentId == oneSubject.id) {
-              //获取一级分类所有的二级分类
-              this.subjectTwoList = oneSubject.children;
-            }
-          }
+    //添加章节
+    addChapter() {
+      //设置课程id到chapter对象里面
+      this.chapter.courseId = this.courseId;
+      chapter.addChapter(this.chapter).then((response) => {
+        //关闭弹框
+        this.dialogChapterFormVisible = false;
+        //提示
+        this.$message({
+          type: "success",
+          message: "添加章节成功!",
         });
-        //初始化所有讲师
-        this.getListTeacher();
+        //刷新页面
+        this.getChapterVideo();
       });
     },
-
+    updateChapter() {
+      //设置课程id到chapter对象里面
+      this.chapter.courseId = this.courseId;
+      chapter.updateChapter(this.chapter).then((response) => {
+        //关闭弹框
+        this.dialogChapterFormVisible = false;
+        //提示
+        this.$message({
+          type: "success",
+          message: "修改章节成功!",
+        });
+        //刷新页面
+        this.getChapterVideo();
+      });
+    },
+    openChapterDialog() {
+      this.chapter.title = ''
+      this.chapter.sort = 0
+      this.dialogChapterFormVisible = true
+    },
+    saveOrUpdate() {
+      if (!this.chapter.id) {
+        this.addChapter()
+      }
+      this.updateChapter()
+    },
+    removeChapter(chapterId) {
+      this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        return chapter.deleteChapter(chapterId)
+      }).then(() => {
+        this.getChapterVideo()
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+      }).catch((response) => { // 失败
+        if (response === 'cancel') {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        } else {
+          this.$message({
+            type: 'error',
+            message: '删除失败'
+          })
+        }
+      })
+    }
   }
 }
 </script>
