@@ -79,7 +79,7 @@
           :before-upload="beforeAvatarUpload"
           :action="BASE_API+'/eduoss/fileoss/upload'"
           class="avatar-uploader">
-          <img :src="courseInfo.cover">
+          <img :src="courseInfo.cover" width="200px" height="200px">
         </el-upload>
 
       </el-form-item>
@@ -113,7 +113,7 @@ export default {
   components: {Tinymce},
   data() {
     return {
-      options:[],
+      options: [],
       subjectParams: {
         label: 'title',
         value: 'id',
@@ -190,5 +190,9 @@ export default {
 .tinymce-container {
   line-height: 29px;
 }
+/*.avatar-uploader{*/
+/*width: 300px;*/
+/*  height:300px;*/
+/*}*/
 
 </style>
