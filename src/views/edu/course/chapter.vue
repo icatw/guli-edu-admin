@@ -80,7 +80,28 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="上传视频">
-          <!-- TODO -->
+          <el-upload
+            :on-success="handleVodUploadSuccess"
+            :on-remove="handleVodRemove"
+            :before-remove="beforeVodRemove"
+            :on-exceed="handleUploadExceed"
+            :file-list="fileList"
+            :action="BASE_API + '/eduvod/video/uploadAlyiVideo'"
+            :limit="1"
+            class="upload-demo"
+          >
+            <el-button size="small" type="primary">上传视频</el-button>
+            <el-tooltip placement="right-end">
+              <div slot="content">
+                最大支持1G，<br/>
+                支持3GP、ASF、AVI、DAT、DV、FLV、F4V、<br/>
+                GIF、M2T、M4V、MJ2、MJPEG、MKV、MOV、MP4、<br/>
+                MPE、MPG、MPEG、MTS、OGG、QT、RM、RMVB、<br/>
+                SWF、TS、VOB、WMV、WEBM 等视频格式上传
+              </div>
+              <i class="el-icon-question"/>
+            </el-tooltip>
+          </el-upload>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -94,6 +115,7 @@
 <script>
 import chapter from "@/api/edu/chapter";
 import video from "@/api/edu/video";
+
 export default {
   data() {
     return {
@@ -112,7 +134,9 @@ export default {
       dialogVideoFormVisible: false, //小节弹框
       saveBtnDisabled: false,// 保存按钮是否禁用
       courseId: '', // 所属课程
-      chapterVideoList: [] // 章节嵌套课时列表
+      chapterVideoList: [], // 章节嵌套课时列表
+      fileList: [], //上传文件列表
+      BASE_API: process.env.BASE_API, // 接口API地址
     }
   },
   created() {
@@ -294,7 +318,38 @@ export default {
         this.updateDataVideo();
       }
     },
-
+    //上传视频成功调用的方法
+    handleVodUploadSuccess(response, file, fileList) {
+      //上传视频id赋值
+      this.video.videoSourceId = response.data.videoId;
+      //上传视频名称赋值
+      this.video.videoOriginalName = file.name;
+    },
+    handleUploadExceed() {
+      this.$message.warning("想要重新上传视频，请先删除已上传的视频");
+    },
+    //点击确定调用的方法
+    handleVodRemove() {
+      //调用接口的删除视频的方法
+      video.deleteAliyunvod(this.video.videoSourceId).then((response) => {
+        //提示信息
+        this.$message({
+          type: "success",
+          message: "删除视频成功!",
+        });
+        //把文件列表清空
+        this.fileList = [];
+        //把video视频id和视频名称值清空
+        //上传视频id赋值
+        this.video.videoSourceId = "";
+        //上传视频名称赋值
+        this.video.videoOriginalName = "";
+      });
+    },
+    //点击×调用这个方法
+    beforeVodRemove(file, fileList) {
+      return this.$confirm(`确定移除 ${file.name}？`);
+    }
   }
 }
 </script>
