@@ -127,11 +127,33 @@ export const constantRouterMap = [
         path: 'publish/:id',
         name: 'EduCoursePublishEdit',
         component: () => import('@/views/edu/course/publish'),
-        meta: { title: '发布课程', noCache: true },
+        meta: {title: '发布课程', noCache: true},
         hidden: true
       }
     ]
   },
+  {
+    path: '/sta',
+    component: Layout,
+    redirect: '/sta/create',
+    name: '统计分析',
+    meta: {title: '统计分析', icon: 'example'},
+    children: [
+      {
+        path: 'create',
+        name: '生成数据',
+        component: () => import('@/views/sta/create'),
+        meta: {title: '生成数据', icon: 'table'}
+      },
+      {
+        path: 'show',
+        name: '图标显示',
+        component: () => import('@/views/sta/show'),
+        meta: {title: '图标显示', icon: 'tree'}
+      }
+    ]
+  },
+
   {path: '*', redirect: '/404', hidden: true}
 ]
 
