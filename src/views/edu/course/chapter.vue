@@ -16,7 +16,7 @@
           {{ chapter.title }}
 
           <span class="acts">
-            <el-button style="" type="text" @click="openVideo(chapter.id)">添加小节</el-button>
+            <el-button style="" type="text" @click="openVideoDialog(chapter.id)">添加小节</el-button>
             <el-button style="" type="text" @click="openEditChatper(chapter.id)">编辑</el-button>
             <el-button type="text" @click="removeChapter(chapter.id)">删除</el-button>
           </span>
@@ -205,6 +205,16 @@ export default {
       this.chapter.sort = 0
       this.dialogChapterFormVisible = true
     },
+    openVideoDialog(chapterId) {
+      this.video.isFree = 0
+      this.video.sort = 0
+      this.video.title = ''
+      this.video.videoSourceId = ''
+      //弹框
+      this.dialogVideoFormVisible = true
+      //设置章节id
+      this.video.chapterId = chapterId
+    },
     saveOrUpdate() {
       if (!this.chapter.id) {
         this.addChapter()
@@ -317,6 +327,7 @@ export default {
       } else {
         this.updateDataVideo();
       }
+      this.dialogVideoFormVisible = false
     },
     //上传视频成功调用的方法
     handleVodUploadSuccess(response, file, fileList) {
